@@ -1,0 +1,4 @@
+{
+  "name": "ObjectDetectionWeb",
+  "description": "A mobile-first web application for object detection using Gemini API, featuring image upload, bounding box visualization, and classification statistics."
+}
