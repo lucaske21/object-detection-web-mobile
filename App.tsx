@@ -72,7 +72,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full mx-auto bg-slate-50 flex flex-col relative shadow-xl overflow-hidden transition-all duration-300 portrait:max-w-md landscape:max-w-5xl">
-      <Header showDetectionTitle={!!imageSrc && !isLoading && !error} />
+      <Header showDetectionTitle={!!imageSrc && !isLoading && !error} onBack={handleReset} />
       
       <main className="flex-1 overflow-y-auto p-4 landscape:p-6 landscape:flex landscape:items-center landscape:justify-center">
         {!imageSrc ? (

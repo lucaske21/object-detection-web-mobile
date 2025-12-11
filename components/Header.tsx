@@ -3,12 +3,16 @@ import { ChevronLeft, PenLine, Share2, Sparkles, CheckCircle2 } from 'lucide-rea
 
 interface HeaderProps {
   showDetectionTitle?: boolean;
+  onBack?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ showDetectionTitle = false }) => {
+export const Header: React.FC<HeaderProps> = ({ showDetectionTitle = false, onBack }) => {
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-slate-50">
-      <button className="p-2.5 bg-white rounded-full shadow-sm text-slate-700 hover:bg-slate-100 transition-colors border border-slate-100">
+      <button 
+        onClick={onBack}
+        className="p-2.5 bg-white rounded-full shadow-sm text-slate-700 hover:bg-slate-100 transition-colors border border-slate-100 active:scale-95"
+      >
         <ChevronLeft size={20} />
       </button>
       
