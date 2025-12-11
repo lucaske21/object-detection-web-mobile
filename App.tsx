@@ -7,8 +7,16 @@ import { detectWithCustomApi } from './services/customApiService';
 import { DetectionResponse } from './types';
 import { Loader2 } from 'lucide-react';
 
-// SETTING: Use environment variable VITE_USE_CUSTOM_API to select API. Set VITE_USE_CUSTOM_API=true in your .env file to use your Custom API defined in services/customApiService.ts
-const USE_CUSTOM_API = String(import.meta.env.VITE_USE_CUSTOM_API).toLowerCase() === "true";
+// SETTING: Use environment variable VITE_USE_CUSTOM_API to select API
+const getRuntimeConfig = () => {
+  if (typeof window !== 'undefined' && (window as any).__RUNTIME_CONFIG__) {
+    return (window as any).__RUNTIME_CONFIG__;
+  }
+  return {};
+};
+
+const runtimeConfig = getRuntimeConfig();
+const USE_CUSTOM_API = (runtimeConfig.VITE_USE_CUSTOM_API || import.meta.env.VITE_USE_CUSTOM_API || 'false').toLowerCase() === 'true';
 
 export default function App() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);

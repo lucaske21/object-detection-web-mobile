@@ -1,14 +1,20 @@
 import { DetectionResponse } from "../types";
 
-// Configuration: Set your API endpoint in the environment variable VITE_API_ENDPOINT (for Vite) or REACT_APP_API_ENDPOINT (for CRA)
-const API_ENDPOINT = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_ENDPOINT)
-  ? import.meta.env.VITE_API_ENDPOINT
-  : (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_ENDPOINT)
-    ? process.env.REACT_APP_API_ENDPOINT
-    : undefined;
+// Configuration: Get from runtime config or build-time environment
+const getRuntimeConfig = () => {
+  if (typeof window !== 'undefined' && (window as any).__RUNTIME_CONFIG__) {
+    return (window as any).__RUNTIME_CONFIG__;
+  }
+  return {};
+};
+
+const runtimeConfig = getRuntimeConfig();
+const API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT 
+  || import.meta.env.VITE_API_ENDPOINT 
+  || '';
 
 if (!API_ENDPOINT) {
-  throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT or REACT_APP_API_ENDPOINT in your environment.");
+  throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
 }
 export const detectWithCustomApi = async (file: File): Promise<DetectionResponse> => {
   try {
