@@ -55,7 +55,7 @@ export const detectWithCustomApi = async (file: File): Promise<DetectionResponse
 
     return {
       detections: predictions.map((item: any) => {
-        // API returns: { class_id, class_name, confidence, x1, y1, x2, y2 }
+        // API returns: { class_name, confidence, x1, y1, x2, y2 }
         // x1, y1 are top-left corner; x2, y2 are bottom-right corner
         // Convert to [ymin, xmin, ymax, xmax] normalized to 0-1000
         return {
@@ -66,8 +66,7 @@ export const detectWithCustomApi = async (file: File): Promise<DetectionResponse
              Math.round((item.y2 / imgHeight) * 1000), // ymax
              Math.round((item.x2 / imgWidth) * 1000)   // xmax
           ], 
-          score: item.confidence || 0.0,
-          class_id: item.class_id
+          score: item.confidence || 0.0
         };
       })
     };
