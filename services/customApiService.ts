@@ -17,7 +17,7 @@ let apiEndpoint = runtimeConfig.VITE_API_ENDPOINT
   || '';
 
 if (USE_CUSTOM_API && !apiEndpoint && typeof window !== 'undefined') {
-  apiEndpoint = `http://${window.location.hostname}/api/v1/detect`;
+  apiEndpoint = `${window.location.origin}/api/v1/detect`;
 }
 
 const API_ENDPOINT = apiEndpoint;
