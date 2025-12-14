@@ -31,7 +31,7 @@ export const detectWithCustomApi = async (file: File): Promise<DetectionResponse
     const formData = new FormData();
     formData.append('file', file);
 
-    console.log(`[CustomAPI] Sending request to ${API_ENDPOINT}`);
+    console.debug(`[CustomAPI] Sending request to ${API_ENDPOINT}`);
 
     // 2. Make the Request
     // Note: Ensure your API supports CORS if calling from a browser
