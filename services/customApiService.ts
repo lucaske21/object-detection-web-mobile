@@ -9,12 +9,21 @@ const getRuntimeConfig = () => {
 };
 
 const runtimeConfig = getRuntimeConfig();
-const API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT 
-  || import.meta.env.VITE_API_ENDPOINT 
-  || '';
+const USE_CUSTOM_API = (runtimeConfig.VITE_USE_CUSTOM_API || import.meta.env.VITE_USE_CUSTOM_API || 'false').toLowerCase() === 'true';
 
-if (!API_ENDPOINT) {
-  throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
+let API_ENDPOINT = (runtimeConfig.VITE_API_ENDPOINT 
+  || import.meta.env.VITE_API_ENDPOINT 
+  || '').trim();
+
+// If custom API is enabled but no endpoint is configured, construct it from the current hostname
+if (USE_CUSTOM_API && !API_ENDPOINT) {
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol; // Will be 'http:' or 'https:'
+    API_ENDPOINT = `${protocol}//${window.location.hostname}/api/v1/detect`;
+    console.debug(`[CustomAPI] No endpoint configured, using hostname-based endpoint: ${API_ENDPOINT}`);
+  } else {
+    throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
+  }
 }
 export const detectWithCustomApi = async (file: File): Promise<DetectionResponse> => {
   try {
@@ -22,7 +31,7 @@ export const detectWithCustomApi = async (file: File): Promise<DetectionResponse
     const formData = new FormData();
     formData.append('file', file);
 
-    console.log(`[CustomAPI] Sending request to ${API_ENDPOINT}`);
+    console.debug(`[CustomAPI] Sending request to ${API_ENDPOINT}`);
 
     // 2. Make the Request
     // Note: Ensure your API supports CORS if calling from a browser
