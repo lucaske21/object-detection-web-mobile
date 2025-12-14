@@ -9,9 +9,18 @@ const getRuntimeConfig = () => {
 };
 
 const runtimeConfig = getRuntimeConfig();
-const API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT 
+
+const USE_CUSTOM_API = (runtimeConfig.VITE_USE_CUSTOM_API || import.meta.env.VITE_USE_CUSTOM_API || 'false').toLowerCase() === 'true';
+
+let apiEndpoint = runtimeConfig.VITE_API_ENDPOINT 
   || import.meta.env.VITE_API_ENDPOINT 
   || '';
+
+if (USE_CUSTOM_API && !apiEndpoint && typeof window !== 'undefined') {
+  apiEndpoint = `http://${window.location.hostname}/api/v1/detect`;
+}
+
+const API_ENDPOINT = apiEndpoint;
 
 if (!API_ENDPOINT) {
   throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
