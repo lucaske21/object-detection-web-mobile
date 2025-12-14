@@ -18,8 +18,9 @@ let API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT
 // If custom API is enabled but no endpoint is configured, construct it from the current hostname
 if (USE_CUSTOM_API && !API_ENDPOINT) {
   if (typeof window !== 'undefined') {
-    API_ENDPOINT = `http://${window.location.hostname}/api/v1/detect`;
-    console.log(`[CustomAPI] No endpoint configured, using hostname-based endpoint: ${API_ENDPOINT}`);
+    const protocol = window.location.protocol; // Will be 'http:' or 'https:'
+    API_ENDPOINT = `${protocol}//${window.location.hostname}/api/v1/detect`;
+    console.debug(`[CustomAPI] No endpoint configured, using hostname-based endpoint: ${API_ENDPOINT}`);
   } else {
     throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
   }
