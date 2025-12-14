@@ -9,12 +9,20 @@ const getRuntimeConfig = () => {
 };
 
 const runtimeConfig = getRuntimeConfig();
-const API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT 
+const USE_CUSTOM_API = (runtimeConfig.VITE_USE_CUSTOM_API || import.meta.env.VITE_USE_CUSTOM_API || 'false').toLowerCase() === 'true';
+
+let API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT 
   || import.meta.env.VITE_API_ENDPOINT 
   || '';
 
-if (!API_ENDPOINT) {
-  throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
+// If custom API is enabled but no endpoint is configured, construct it from the current hostname
+if (USE_CUSTOM_API && !API_ENDPOINT) {
+  if (typeof window !== 'undefined') {
+    API_ENDPOINT = `http://${window.location.hostname}/api/v1/detect`;
+    console.log(`[CustomAPI] No endpoint configured, using hostname-based endpoint: ${API_ENDPOINT}`);
+  } else {
+    throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
+  }
 }
 export const detectWithCustomApi = async (file: File): Promise<DetectionResponse> => {
   try {
