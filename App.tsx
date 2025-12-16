@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Header } from './components/Header';
 import { UploadArea } from './components/UploadArea';
 import { DetectionResult } from './components/DetectionResult';
+import { ModelSelector } from './components/ModelSelector';
 import { detectObjects as detectWithGemini } from './services/geminiService';
 import { detectWithCustomApi } from './services/customApiService';
 import { DetectionResponse } from './types';
@@ -23,6 +24,13 @@ export default function App() {
   const [result, setResult] = useState<DetectionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+  const [selectedModelName, setSelectedModelName] = useState<string | null>(null);
+
+  const handleModelSelect = useCallback((modelId: number, modelName: string) => {
+    setSelectedModelId(modelId);
+    setSelectedModelName(modelName);
+  }, []);
 
   const handleImageSelect = useCallback(async (file: File) => {
     // Create local preview
@@ -36,7 +44,11 @@ export default function App() {
       if (USE_CUSTOM_API) {
         // Custom API: Upload file directly
         try {
-          const detectionData = await detectWithCustomApi(file);
+          const detectionData = await detectWithCustomApi(
+            file, 
+            selectedModelId !== null ? selectedModelId : undefined,
+            selectedModelName || undefined
+          );
           setResult(detectionData);
         } catch (err: any) {
           console.error("Detection error:", err);
@@ -70,7 +82,7 @@ export default function App() {
       setError("处理文件失败");
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedModelId, selectedModelName]);
 
   const handleReset = useCallback(() => {
     setImageSrc(null);
@@ -85,18 +97,29 @@ export default function App() {
       <main className="flex-1 overflow-y-auto p-4 landscape:p-6 landscape:flex landscape:items-center landscape:justify-center">
         {!imageSrc ? (
           // Upload / Home View
-          <div className="w-full h-full flex flex-col landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-12 animate-fade-in">
-             {/* Title Section */}
-             <div className="text-center landscape:text-left space-y-2 mt-4 landscape:mt-0 landscape:flex-1 landscape:max-w-xs">
-                <h1 className="text-2xl landscape:text-3xl font-bold text-slate-900 tracking-tight">图像识别</h1>
-                <p className="text-slate-500 text-sm landscape:text-base leading-relaxed">
-                  {USE_CUSTOM_API ? '基于 Custom API 的目标检测' : '基于 Gemini AI 的智能目标检测'}<br className="hidden landscape:block" />
-                  上传图片，自动识别并标注物体。
-                </p>
+          <div className="w-full h-full flex flex-col landscape:flex-row landscape:items-start landscape:justify-center landscape:gap-8 animate-fade-in">
+             {/* Left Column: Title & Model Selection */}
+             <div className="flex flex-col gap-4 landscape:gap-6 landscape:flex-1 landscape:max-w-md">
+               {/* Title Section */}
+               <div className="text-center landscape:text-left space-y-2 mt-4 landscape:mt-0">
+                  <h1 className="text-2xl landscape:text-3xl font-bold text-slate-900 tracking-tight">图像识别</h1>
+                  <p className="text-slate-500 text-sm landscape:text-base leading-relaxed">
+                    {USE_CUSTOM_API ? '基于 Custom API 的目标检测' : '基于 Gemini AI 的智能目标检测'}<br className="hidden landscape:block" />
+                    上传图片，自动识别并标注物体。
+                  </p>
+               </div>
+
+               {/* Model Selection */}
+               {USE_CUSTOM_API && (
+                 <ModelSelector 
+                   selectedModelId={selectedModelId} 
+                   onModelSelect={handleModelSelect} 
+                 />
+               )}
              </div>
 
-             {/* Upload Section */}
-             <div className="landscape:flex-1 landscape:w-full landscape:max-w-sm mt-8 landscape:mt-0">
+             {/* Right Column: Upload Section */}
+             <div className="landscape:flex-1 landscape:w-full landscape:max-w-sm mt-4 landscape:mt-0">
                 <UploadArea onImageSelect={handleImageSelect} />
              </div>
           </div>
@@ -130,6 +153,7 @@ export default function App() {
               <DetectionResult 
                 imageSrc={imageSrc} 
                 detections={result?.detections || []}
+                modelName={result?.model_name}
                 onReset={handleReset}
               />
             )}

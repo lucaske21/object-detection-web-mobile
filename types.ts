@@ -10,6 +10,7 @@ export interface DetectionObject {
 
 export interface DetectionResponse {
   detections: DetectionObject[];
+  model_name?: string;
   // Summary counts are derived from detections
 }
 
