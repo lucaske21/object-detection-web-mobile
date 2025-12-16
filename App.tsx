@@ -24,7 +24,13 @@ export default function App() {
   const [result, setResult] = useState<DetectionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+  const [selectedModelName, setSelectedModelName] = useState<string | null>(null);
+
+  const handleModelSelect = useCallback((modelId: number, modelName: string) => {
+    setSelectedModelId(modelId);
+    setSelectedModelName(modelName);
+  }, []);
 
   const handleImageSelect = useCallback(async (file: File) => {
     // Create local preview
@@ -38,7 +44,11 @@ export default function App() {
       if (USE_CUSTOM_API) {
         // Custom API: Upload file directly
         try {
-          const detectionData = await detectWithCustomApi(file, selectedModel || undefined);
+          const detectionData = await detectWithCustomApi(
+            file, 
+            selectedModelId !== null ? selectedModelId : undefined,
+            selectedModelName || undefined
+          );
           setResult(detectionData);
         } catch (err: any) {
           console.error("Detection error:", err);
@@ -72,7 +82,7 @@ export default function App() {
       setError("处理文件失败");
       setIsLoading(false);
     }
-  }, [selectedModel]);
+  }, [selectedModelId, selectedModelName]);
 
   const handleReset = useCallback(() => {
     setImageSrc(null);
@@ -102,8 +112,8 @@ export default function App() {
                {/* Model Selection */}
                {USE_CUSTOM_API && (
                  <ModelSelector 
-                   selectedModel={selectedModel} 
-                   onModelSelect={setSelectedModel} 
+                   selectedModelId={selectedModelId} 
+                   onModelSelect={handleModelSelect} 
                  />
                )}
              </div>
@@ -143,6 +153,7 @@ export default function App() {
               <DetectionResult 
                 imageSrc={imageSrc} 
                 detections={result?.detections || []}
+                modelName={result?.model_name}
                 onReset={handleReset}
               />
             )}

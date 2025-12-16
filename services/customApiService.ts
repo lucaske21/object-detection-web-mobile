@@ -11,23 +11,20 @@ const getRuntimeConfig = () => {
 const runtimeConfig = getRuntimeConfig();
 const API_ENDPOINT = runtimeConfig.VITE_API_ENDPOINT 
   || import.meta.env.VITE_API_ENDPOINT 
-  || '';
+  || `${window.location.origin}/api/v2/detect`;
 
-if (!API_ENDPOINT) {
-  throw new Error("API endpoint is not configured. Please set VITE_API_ENDPOINT environment variable when starting the container.");
-}
-export const detectWithCustomApi = async (file: File, modelName?: string): Promise<DetectionResponse> => {
+export const detectWithCustomApi = async (file: File, modelId?: number, modelName?: string): Promise<DetectionResponse> => {
   try {
     // 1. Prepare the FormData with the file
     const formData = new FormData();
     formData.append('file', file);
     
-    // Add model name if provided
-    if (modelName) {
-      formData.append('model', modelName);
+    // Add model_id if provided
+    if (modelId !== undefined) {
+      formData.append('model_id', modelId.toString());
     }
 
-    console.log(`[CustomAPI] Sending request to ${API_ENDPOINT}${modelName ? ` with model: ${modelName}` : ''}`);
+    console.log(`[CustomAPI] Sending request to ${API_ENDPOINT}${modelId !== undefined ? ` with model_id: ${modelId}` : ''}`);
 
     // 2. Make the Request
     // Note: Ensure your API supports CORS if calling from a browser
@@ -80,7 +77,8 @@ export const detectWithCustomApi = async (file: File, modelName?: string): Promi
           ], 
           score: item.confidence || 0.0
         };
-      })
+      }),
+      model_name: modelName
     };
 
   } catch (error) {

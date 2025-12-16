@@ -3,11 +3,11 @@ import { fetchModels, Model } from '../services/modelService';
 import { Loader2 } from 'lucide-react';
 
 interface ModelSelectorProps {
-  selectedModel: string | null;
-  onModelSelect: (modelName: string) => void;
+  selectedModelId: number | null;
+  onModelSelect: (modelId: number, modelName: string) => void;
 }
 
-export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onModelSelect }) => {
+export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModelId, onModelSelect }) => {
   const [models, setModels] = useState<Model[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +22,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
         setModels(fetchedModels);
         
         // Auto-select first model if none selected and models exist
-        if (fetchedModels.length > 0 && !selectedModel) {
-          onModelSelect(fetchedModels[0].model_name);
+        if (fetchedModels.length > 0 && selectedModelId === null) {
+          onModelSelect(fetchedModels[0].model_id, fetchedModels[0].model_name);
         }
       } catch (err) {
         console.error('Failed to load models:', err);
@@ -64,9 +64,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
       <div className="space-y-2 landscape:space-y-3">
         {models.map((model) => (
           <label
-            key={model.model_name}
+            key={model.model_id}
             className={`flex items-start gap-3 p-3 landscape:p-4 rounded-xl cursor-pointer transition-all border-2 ${
-              selectedModel === model.model_name
+              selectedModelId === model.model_id
                 ? 'bg-blue-50 border-blue-400'
                 : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
             }`}
@@ -74,9 +74,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
             <input
               type="radio"
               name="model"
-              value={model.model_name}
-              checked={selectedModel === model.model_name}
-              onChange={(e) => onModelSelect(e.target.value)}
+              value={model.model_id}
+              checked={selectedModelId === model.model_id}
+              onChange={() => onModelSelect(model.model_id, model.model_name)}
               className="mt-0.5 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
             />
             <div className="flex-1 min-w-0">

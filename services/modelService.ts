@@ -1,4 +1,5 @@
 export interface Model {
+  model_id: number;
   model_name: string;
   version: string;
   task: string;
@@ -6,7 +7,7 @@ export interface Model {
 }
 
 export interface ModelsResponse {
-  [key: string]: Model;
+  [key: string]: Omit<Model, 'model_id'>;
 }
 
 export const fetchModels = async (): Promise<Model[]> => {
@@ -21,8 +22,11 @@ export const fetchModels = async (): Promise<Model[]> => {
 
     const data: ModelsResponse = await response.json();
     
-    // Convert object to array
-    return Object.values(data);
+    // Convert object to array with model_id from key
+    return Object.entries(data).map(([key, model]) => ({
+      ...model,
+      model_id: parseInt(key, 10)
+    }));
   } catch (error) {
     console.error('Error fetching models:', error);
     // Return empty array if fetch fails
