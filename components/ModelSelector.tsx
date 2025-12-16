@@ -25,7 +25,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
         if (fetchedModels.length > 0 && !selectedModel) {
           onModelSelect(fetchedModels[0].model_name);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error('Failed to load models:', err);
         setError('加载模型失败');
       } finally {
@@ -34,7 +34,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
     };
 
     loadModels();
-  }, [selectedModel, onModelSelect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isLoading) {
     return (
