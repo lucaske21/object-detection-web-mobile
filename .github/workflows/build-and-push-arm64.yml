@@ -1,0 +1,60 @@
+name: Build and Push Docker Image (ARM64)
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-arm64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          COMMIT_HASH=${GITHUB_SHA::7}
+          echo "branch=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "commit=${COMMIT_HASH}" >> $GITHUB_OUTPUT
+          echo "tag=${BRANCH_NAME}-${COMMIT_HASH}-arm64" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image (ARM64)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile-arm64
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
+          cache-from: ''
+          cache-to: ''
+
+      - name: Output image details
+        run: |
+          echo "ARM64 image built and pushed successfully!"
+          echo "Image tag: ${{ steps.meta.outputs.tag }}"
+          echo "Full image name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}"
